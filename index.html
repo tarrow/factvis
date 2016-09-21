@@ -31,7 +31,7 @@
         $.get('sample.json', function(file) {
           console.log(file)
           receivedText(file)
-        }).fail((err) => alert('error: ' + JSON.stringify(err)))
+        }).fail((err) => receivedText(e.responseText))
       }
 
       function receivedText(e) {
