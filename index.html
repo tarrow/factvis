@@ -77,15 +77,18 @@
 Choose a local ContentMine fact dump: (like <a href="https://zenodo.org/search?page=1&size=20&q=contentmine&file_type=json">these</a> on zenodo)
     <form id="jsonFile" name="jsonFile" enctype="multipart/form-data" method="post">
       <fieldset>
-        <input type='file' id='fileinput'>
-        <input type='button' id='btnLoad' value='Load' onclick='loadFile();'>
+        <label class="btn btn-default btn-file">
+          Browse Files
+        <input type='file' id='fileinput' style="display: none;">
+      </label>
+        <input type='button' id='btnLoad' value='Load' onclick='loadFile();' class="btn btn-primary">
       </fieldset>
     </form>
 
 Or just use the a subset of the sample Zika dataset. Full version available from: <a href="https://doi.org/10.5281/zenodo.154505">here</a>
     <form>
       <fieldset>
-        <input type='button' id='btnDefault' value='Load Zika Facts!' onclick="loadDefault();">
+        <input type='button' id='btnDefault' value='Load Zika Facts!' onclick="loadDefault();" class="btn btn-primary">
       </fieldset>
     </form>
 
