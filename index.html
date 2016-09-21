@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>ContentMine Facts</title>
+    <link href="bower_components/bootstrap-css/css/bootstrap.min.css" rel="stylesheet">
+
+  </head>
+  <body>
+    <h1>ContentMine Facts about Zika</h1>
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+    <script src="bower_components/bootstrap-css/js/bootstrap.min.js"></script>
+    <script src="bower_components/jput/js/jput.min.js"></script>
+    <script src="bower_components/lodash/lodash.js"></script>
+    <script src="bower_components/datatables/media/js/jquery.dataTables.min.js"></script>
+    <script src="bower_components/datatables/media/js/dataTables.bootstrap.min.js"></script>
+    <script>
+      function loadFile() {
+        var input = document.getElementById('fileinput');
+        var file = input.files[0];
+        var fr = new FileReader();
+        fr.onload = receivedText;
+        fr.readAsText(file);
+
+      function receivedText(e) {
+        lines = e.target.result.split('\n');
+        var newArr = []
+        for(var line = 0; line < lines.length; line++){
+          try{
+            var obj = JSON.parse(lines[line])
+            obj._source.prefix = _.escape(obj._source.prefix)
+            obj._source.post = _.escape(obj._source.post)
+            obj._source.term = _.escape(obj._source.term)
+          newArr.push(obj)
+        }catch(e){
+
+        }
+        }
+        var html = ''
+        $.each(newArr, function(index, value) {
+          html += '<tr>' +
+                '<td>'+value._source.cprojectID+'</td>' +
+                '<td>'+value._source.prefix+'</td>' +
+                '<td>'+value._source.term+'</td>' +
+                '<td>'+value._source.post+'</td>' +
+                '<td>'+value._source.identifiers.wikidata+'</td>' +
+               '</tr>';
+        })
+        $('tbody').append(html)
+
+        $('#mytable').DataTable({
+          ordering: true
+        })
+
+      }
+
+  }
+
+    </script>
+
+    <form id="jsonFile" name="jsonFile" enctype="multipart/form-data" method="post">
+      <fieldset>
+        <input type='file' id='fileinput'>
+        <input type='button' id='btnLoad' value='Load' onclick='loadFile();'>
+      </fieldset>
+    </form>
+
+    <table class="table table-bordered" id="mytable">
+      <thead>
+        <tr>
+          <th>cprojectID</th>
+          <th>Fact Prefix</th>
+          <th>Fact</th>
+          <th>Fact Postfix</th>
+          <th>Wikidata ID</th>
+        </tr>
+      </thead>
+     <tbody id="tbody">
+     </tbody>
+    </table>
+
+
+  </body>
+</html>
