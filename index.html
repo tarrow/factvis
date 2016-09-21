@@ -31,7 +31,12 @@
         $.get('sample.json', function(file) {
           console.log(file)
           receivedText(file)
-        }).fail((err) => receivedText(err.responseText))
+        }).fail((err) => {
+          var e = {}
+          e.target = {}
+          e.target.result = err.responseText
+          receivedText(e)}
+        )
       }
 
       function receivedText(e) {
