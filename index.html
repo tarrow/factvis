@@ -27,6 +27,7 @@
       }
 
       function loadDefault() {
+        console.log('loading default')
         $.get('sample.json', function(file) {
           console.log(file)
           receivedText(file)
