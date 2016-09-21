@@ -9,7 +9,7 @@
 
   </head>
   <body>
-    <h1>ContentMine Facts about Zika</h1>
+    <h1>ContentMine Facts Visualiser</h1>
 
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
     <script src="bower_components/bootstrap-css/js/bootstrap.min.js"></script>
@@ -24,6 +24,11 @@
         var fr = new FileReader();
         fr.onload = receivedText;
         fr.readAsText(file);
+      }
+
+      function loadDefault() {
+        $.get('sample.json', receivedText)
+      }
 
       function receivedText(e) {
         lines = e.target.result.split('\n');
@@ -57,14 +62,21 @@
 
       }
 
-  }
 
     </script>
 
+Choose a local ContentMine fact dump: (like <a href="https://zenodo.org/search?page=1&size=20&q=contentmine&file_type=json">these</a> on zenodo)
     <form id="jsonFile" name="jsonFile" enctype="multipart/form-data" method="post">
       <fieldset>
         <input type='file' id='fileinput'>
         <input type='button' id='btnLoad' value='Load' onclick='loadFile();'>
+      </fieldset>
+    </form>
+
+Or just use the a subset of the sample Zika dataset. Full version available from: <a href="https://doi.org/10.5281/zenodo.154505">here</a>
+    <form>
+      <fieldset>
+        <input type='button' id='btnDefault' value='Load Zika Facts!' onclick="loadDefault();">
       </fieldset>
     </form>
 
