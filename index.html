@@ -54,13 +54,20 @@
         }
         }
         var html = ''
+        var wikidataID = function(wid) {
+          if (wid) {
+            formattedString = `<a href="https://www.wikidata.org/entity/${wid}">${wid}</a>`
+            return formattedString
+          }
+          else return ''
+        }
         $.each(newArr, function(index, value) {
           html += '<tr>' +
                 '<td>'+value._source.cprojectID+'</td>' +
                 '<td>'+value._source.prefix+'</td>' +
                 '<td>'+value._source.term+'</td>' +
                 '<td>'+value._source.post+'</td>' +
-                '<td>'+value._source.identifiers.wikidata+'</td>' +
+                '<td>'+wikidataID(value._source.identifiers.wikidata)+'</td>' +
                '</tr>';
         })
         $('tbody').append(html)
