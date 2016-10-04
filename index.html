@@ -17,6 +17,8 @@
     <script src="bower_components/lodash/lodash.js"></script>
     <script src="bower_components/datatables/media/js/jquery.dataTables.min.js"></script>
     <script src="bower_components/datatables/media/js/dataTables.bootstrap.min.js"></script>
+    <script src="bower_components/wikidata-sdk/dist/wikidata-sdk.js"></script>
+    <script src="colors.js"></script>
     <script>
       function loadFile() {
         var input = document.getElementById('fileinput');
@@ -61,6 +63,29 @@
           }
           else return ''
         }
+
+        colormap = {}
+
+        var getColorNumber = function (cmid) {
+          var dictionary = cmid.split('.')[1].split(/[0-9]/)[0]
+          if (!(dictionary in colormap)) {
+            var newColorValue=Math.max(1, ... _.values(colormap))+1
+            if (Number.isInteger(newColorValue)) {
+              colormap[dictionary] = newColorValue
+            }
+          }
+          console.log(dictionary)
+          return colors[colormap[dictionary]]
+        }
+
+        var createdRowFunc = function (row, data, dataIndex) {
+          console.log(data[5])
+          var color = getColorNumber(data[5])
+          console.log(row)
+          console.log(color)
+          $(row).css('background-color', color)
+        }
+
         $.each(newArr, function(index, value) {
           html += '<tr>' +
                 '<td>'+value._source.cprojectID+'</td>' +
@@ -68,12 +93,14 @@
                 '<td>'+value._source.term+'</td>' +
                 '<td>'+value._source.post+'</td>' +
                 '<td>'+wikidataID(value._source.identifiers.wikidata)+'</td>' +
+                '<td>'+value._source.identifiers.contentmine+'</td>' +
                '</tr>';
         })
         $('tbody').append(html)
 
         $('#mytable').DataTable({
-          ordering: true
+          ordering: true,
+          "createdRow": createdRowFunc
         })
 
       }
@@ -107,6 +134,7 @@ Or just use the a subset of the sample Zika dataset. Full version available from
           <th>Fact</th>
           <th>Fact Postfix</th>
           <th>Wikidata ID</th>
+          <th>ContentMine ID</th>
         </tr>
       </thead>
      <tbody id="tbody">
