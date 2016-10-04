@@ -29,9 +29,7 @@
       }
 
       function loadDefault() {
-        console.log('loading default')
         $.get('sample.json', function(file) {
-          console.log(file)
           receivedText(file)
         }).fail((err) => {
           var e = {}
@@ -74,15 +72,11 @@
               colormap[dictionary] = newColorValue
             }
           }
-          console.log(dictionary)
           return colors[colormap[dictionary]]
         }
 
         var createdRowFunc = function (row, data, dataIndex) {
-          console.log(data[5])
           var color = getColorNumber(data[5])
-          console.log(row)
-          console.log(color)
           $(row).css('background-color', color)
         }
 
