@@ -216,7 +216,7 @@
         function createdRowFunc (row, data, dataIndex) {
           var color = getColorNumber(data[0])
           $(row).find('td.cmid .icon').css('background-color', color)
-          /*var wid = $(data[5]).text()
+          var wid = $(data[5]).text()
           if (wid) {
             getWikiBaseItem(wid, function (response) {
                 var title = response.entities[wid].sitelinks.enwiki.title
@@ -229,7 +229,7 @@
                   if (target) $(row).find('td.term img').attr('title',`Population of: ${target}`)
                 })
               })
-          }*/
+          }
         }
 
         $('#front-loading-matter').css('display', 'none')
@@ -360,6 +360,8 @@
     </main>
 
     <footer>
+      <hr>
+      <p class="text-muted credit">Port of <a href="https://github.com/tarrow">tarrow</a>'s <a href="http://tarrow.github.io/factvis">page</a></p>
       <p class="text-muted credit">The W icon (<img src="W_icon.png"/>) for links to Wikipedia is a trademark of and authored by the Wikimedia Foundation. It is released under a CC BY-SA 3.0 license</p>
     </footer>
     
