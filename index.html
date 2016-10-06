@@ -9,7 +9,7 @@
 
   </head>
   <body>
-    <h1>ContentMine Facts about Zika</h1>
+    <h1>ContentMine Facts Visualiser</h1>
 
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
     <script src="bower_components/bootstrap-css/js/bootstrap.min.js"></script>
@@ -17,6 +17,8 @@
     <script src="bower_components/lodash/lodash.js"></script>
     <script src="bower_components/datatables/media/js/jquery.dataTables.min.js"></script>
     <script src="bower_components/datatables/media/js/dataTables.bootstrap.min.js"></script>
+    <script src="bower_components/wikidata-sdk/dist/wikidata-sdk.js"></script>
+    <script src="colors.js"></script>
     <script>
       function loadFile() {
         var input = document.getElementById('fileinput');
@@ -24,6 +26,18 @@
         var fr = new FileReader();
         fr.onload = receivedText;
         fr.readAsText(file);
+      }
+
+      function loadDefault() {
+        $.get('sample.json', function(file) {
+          receivedText(file)
+        }).fail((err) => {
+          var e = {}
+          e.target = {}
+          e.target.result = err.responseText
+          receivedText(e)}
+        )
+      }
 
       function receivedText(e) {
         lines = e.target.result.split('\n');
@@ -40,35 +54,119 @@
         }
         }
         var html = ''
+        var wikidataID = function(wid) {
+          if (wid) {
+            formattedString = `<a href="https://www.wikidata.org/entity/${wid}">${wid}</a>`
+            return formattedString
+          }
+          else return ''
+        }
+
+        colormap = {}
+
+        var getColorNumber = function (cmid) {
+          var dictionary = cmid.split('.')[1].split(/[0-9]/)[0]
+          if (!(dictionary in colormap)) {
+            var newColorValue=Math.max(1, ... _.values(colormap))+1
+            if (Number.isInteger(newColorValue)) {
+              colormap[dictionary] = newColorValue
+            }
+          }
+          return colors[colormap[dictionary]]
+        }
+
+        var prependEnWiki = function (name) {
+          return 'https://en.wikipedia.org/wiki/'+name
+        }
+
+        //return the value of the property of the string name if the target is an item
+        var returnTargetOfProperty = function(response, wid, pid, cb) {
+          try {
+            var target = response.entities[wid].claims[pid][0].mainsnak.datavalue.value.amount
+            if(response.entities[wid].claims[pid][0].mainsnak.datatype == "wikibase-item") {
+
+            }
+            cb(target)
+          }
+          catch (err) {}
+        }
+
+        var getWikiBaseItem = function (wid, cb) {
+          $.ajax({
+            url: wdk.getEntities(wid),
+            jsonp: "callback",
+            dataType: "jsonp",
+            success: cb
+          })
+        }
+
+        var createdRowFunc = function (row, data, dataIndex) {
+          var color = getColorNumber(data[5])
+          $(row).css('background-color', color)
+          var wid = $(data[4]).text()
+          if (wid) {
+            getWikiBaseItem(wid, function (response) {
+                var title = response.entities[wid].sitelinks.enwiki.title
+                if (title) {
+                  var url = prependEnWiki(title)
+                  var html = `<a href="${url}"><img src="W_icon.png" alt="wikipedia_icon"</a>`
+                  $(row).find('td.term').append(html)
+                }
+                returnTargetOfProperty(response, wid, 'P1082', function (target) {
+                  if (target) $(row).find('td.term').append(` (population of: ${target})`)
+                })
+              })
+          }
+        }
+
+        $('#front-loading-matter').css('display', 'none')
+        $('#mytable').css('display', 'table')
+
         $.each(newArr, function(index, value) {
           html += '<tr>' +
                 '<td>'+value._source.cprojectID+'</td>' +
                 '<td>'+value._source.prefix+'</td>' +
-                '<td>'+value._source.term+'</td>' +
+                '<td class="term">'+value._source.term+'</td>' +
                 '<td>'+value._source.post+'</td>' +
-                '<td>'+value._source.identifiers.wikidata+'</td>' +
+                '<td>'+wikidataID(value._source.identifiers.wikidata)+'</td>' +
+                '<td>'+value._source.identifiers.contentmine+'</td>' +
                '</tr>';
         })
         $('tbody').append(html)
 
+
+
         $('#mytable').DataTable({
-          ordering: true
+          ordering: true,
+          "createdRow": createdRowFunc
         })
+
+
 
       }
 
-  }
 
     </script>
-
+<div id="front-loading-matter">
+Choose a local ContentMine fact dump: (like <a href="https://zenodo.org/search?page=1&size=20&q=contentmine&file_type=json">these</a> on zenodo)
     <form id="jsonFile" name="jsonFile" enctype="multipart/form-data" method="post">
       <fieldset>
-        <input type='file' id='fileinput'>
-        <input type='button' id='btnLoad' value='Load' onclick='loadFile();'>
+        <label class="btn btn-default btn-file">
+          Browse Files
+        <input type='file' id='fileinput' style="display: none;">
+      </label>
+        <input type='button' id='btnLoad' value='Load' onclick='loadFile();' class="btn btn-primary">
       </fieldset>
     </form>
 
-    <table class="table table-bordered" id="mytable">
+Or just use the a subset of the sample Zika dataset. Full version available from: <a href="https://doi.org/10.5281/zenodo.154505">here</a>
+    <form>
+      <fieldset>
+        <input type='button' id='btnDefault' value='Load Zika Facts!' onclick="loadDefault();" class="btn btn-primary">
+      </fieldset>
+    </form>
+  </div>
+    <table class="table table-bordered" id="mytable" style="display: none";>
       <thead>
         <tr>
           <th>cprojectID</th>
@@ -76,12 +174,14 @@
           <th>Fact</th>
           <th>Fact Postfix</th>
           <th>Wikidata ID</th>
+          <th>ContentMine ID</th>
         </tr>
       </thead>
      <tbody id="tbody">
      </tbody>
     </table>
 
+<p class="text-muted credit">The W icon for links to Wikipedia is a trademark of and authored by the Wikimedia Foundation. It is released under a CC BY-SA 3.0 license</p>
 
   </body>
 </html>
