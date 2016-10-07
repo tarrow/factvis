@@ -1,9 +1,89 @@
 @charset "utf-8";
 
-:focus { outline: 0; }
+@font-face {
+  font-family: 'Material Icons';
+  font-style: normal;
+  font-weight: 400;
+  src: local('Material Icons'), local('MaterialIcons-Regular'), url(https://fonts.gstatic.com/s/materialicons/v17/2fcrYFNaTjcS6g4U3t-Y5ZjZjT5FdEJ140U2DJYC3mY.woff2) format('woff2');
+}
+
+a[href^="https://" i]:after,
+a[href^="http://" i]:after,
+.pagination > .paginate_button > a:before,
+.material-icons {
+  font-family: 'Material Icons';
+  font-weight: normal;
+  font-style: normal;
+  font-size: 24px;
+  line-height: 1;
+  letter-spacing: normal;
+  text-transform: none;
+  display: inline-block;
+  white-space: nowrap;
+  word-wrap: normal;
+  direction: ltr;
+  -webkit-font-feature-settings: 'liga';
+  -webkit-font-smoothing: antialiased;
+}
+
+:focus { outline: 0 !important; }
 
 .pointer {
   cursor: pointer;
+}
+
+form {
+  margin:16px 0;
+}
+
+[type="reset"], [type="button"], [type="submit"], button {
+  padding: 10px 16px;margin: 6px 8px;
+  min-width:88px;min-height:36px;
+  
+  border-radius: 3px;border: none;outline: none;
+  box-shadow: 0 2px 5px 0 rgba(0, 0, 0, 0.26);
+  
+  background-color:#607D8B;color:white;
+  
+  font-family:Roboto;font-weight:500;font-size: 14px;
+  text-align: center;text-transform: uppercase;text-decoration:none;
+}
+
+[type="reset"]:active, [type="button"]:active, [type="submit"]:active, button:active,
+[type="reset"]:focus, [type="button"]:focus, [type="submit"]:focus, button:focus,
+[type="reset"]:hover, [type="button"]:hover, [type="submit"]:hover, button:hover {
+  background-color:#607D8B;
+}
+
+label   { white-space:nowrap;position:relative;margin-right:16px; }
+
+label * { vertical-align: middle; }
+
+label input[type="text"] {
+  box-sizing: border-box;
+  width: calc(100% - 32px);
+  border: none;
+  border-bottom: 1px solid rgba(0, 0, 0, .12);
+  font-size: 16px;
+  margin: 0;
+  padding: 4px 0;
+  background: 16px;
+  text-align: left;
+  color: inherit;
+  font-weight:400;
+}
+
+label div {
+  display: inline-block;
+}
+
+label input[type="file"] {
+  position: absolute;
+  right: 0;top: 0;bottom:0;
+  width:300px;
+  
+  cursor: pointer;
+  opacity: 0; 
 }
 
 * {
@@ -77,15 +157,21 @@ td.post span { direction:ltr;float: left }
 
 /* Term */
 td.term { text-align:center;font-weight:bold; }
+
+/* Fact */
+tr      { position:relative; }
+td.ftid { position:absolute;right:100%;margin-right:-16px;opacity:0; }
+tr:hover td.ftid { opacity:1; }
 /*END*/
 
 hr {
   border-color:rgba(0,0,0,.12);
 }
 
-#desc {
-  display:none;
-}
+#desc { display:none; }
+  
+#backButton { color:white;height:100%;float:left;padding:20px 8px 20px 16px;
+              display:none;cursor:pointer; }
 
 #mytable th {
   text-transform:uppercase;text-align:center;
@@ -124,35 +210,48 @@ td > span { margin:9.5px 0; }
 td > span:empty { position:relative;height:20px; }
 td > span:empty:before { top:0;position:absolute;content:'-'; }
 
+.pagination > .paginate_button {
+  display: inline-block;
+  min-width:32px;height:32px;
+}
+
+.pagination > .paginate_button > a {
+  background:transparent !important;
+  border:none;
+  color:rgba(0,0,0,.54) !important;
+}
+
+.pagination > .active > a {
+  color:rgba(0,0,0,.87) !important;
+  font-weight:bold;
+}
+
+.pagination > .disabled > a {
+  color:rgba(0,0,0,.25) !important;
+}
+
+.pagination > .paginate_button.previous > a ,
+.pagination > .paginate_button.next     > a {
+  position:relative;
+  font-size:0;
+  display:inline-block;
+  width:32px;height:32px;
+}
+
+.pagination > .paginate_button.previous > a:before,
+.pagination > .paginate_button.next > a:before    {
+  position:absolute;
+  top:4px;right:4px;left:4px;bottom:4px;
+  opacity:1;
+}
+
+.pagination > .paginate_button.previous > a:before { content: 'chevron_left' }
+.pagination > .paginate_button.next > a:before     { content: 'chevron_right' }
+
 a[href^="https://" i]:after,
 a[href^="http://" i]:after {
   content:'exit_to_app';
   padding-left:.3em;
   vertical-align: middle;
   font-size: 16px !important;
-}
-
-@font-face {
-  font-family: 'Material Icons';
-  font-style: normal;
-  font-weight: 400;
-  src: local('Material Icons'), local('MaterialIcons-Regular'), url(https://fonts.gstatic.com/s/materialicons/v17/2fcrYFNaTjcS6g4U3t-Y5ZjZjT5FdEJ140U2DJYC3mY.woff2) format('woff2');
-}
-
-a[href^="https://" i]:after,
-a[href^="http://" i]:after,
-.material-icons {
-  font-family: 'Material Icons';
-  font-weight: normal;
-  font-style: normal;
-  font-size: 24px;
-  line-height: 1;
-  letter-spacing: normal;
-  text-transform: none;
-  display: inline-block;
-  white-space: nowrap;
-  word-wrap: normal;
-  direction: ltr;
-  -webkit-font-feature-settings: 'liga';
-  -webkit-font-smoothing: antialiased;
 }
