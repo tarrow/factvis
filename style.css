@@ -253,5 +253,5 @@ a[href^="http://" i]:after {
   content:'exit_to_app';
   padding-left:.3em;
   vertical-align: middle;
-  font-size: 16px !important;
+  font-size: 1em !important;
 }
