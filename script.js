@@ -1,11 +1,16 @@
 var table
   , hash  = getHash()
+  , load  = true
   
+  , colormap = {}
   , column= [ 'cmid', 'pmid', 'pre', 'term', 'post', 'wdid', 'ftid' ]
   , desc  = {
-    cmid: function (title) {return(
-      '<strong>'+title.split('.').map(function(v,i){if(i>0)return v.toLowerCase();return v}).join('.') +'</strong>'+
-      ' is an object identifier issued by the <a href="http://contentmine.org">ContentMine</a>.'
+    cmid: function (title) {var item;return(
+      '<strong>'+title+'</strong> is an object identifier issued by the <a href="http://contentmine.org">ContentMine</a>.'+
+      ' It is a' + ('aeiou'.indexOf(
+	(item=title.split('.')[1].split(/\d/)[0].split(/(?=[A-Z])/).join(' ').toLowerCase())[0])>-1
+      ?'n':'') + ' ' + item +
+      ' (<div class="icon-small" style="background:' + getColorNumber( title ) + '"></div>)'
     )}
   , pmid: function (title) {return(
       '<strong>'+title + '</strong> is an article identifier issued by <a href="https://www.ncbi.nlm.nih.gov/pmc/">Pubmed Central</a>. '+
@@ -13,7 +18,7 @@ var table
     )}
   , wdid: function (title) {return(
       '<strong>'+title + '</strong> is an object identifier issued by <a href="https://wikidata.org">Wikidata</a>. '+
-      '<a href="https://wikidata.org/wiki/' + title + '">Here\'s the item</a>'
+      '<a href="https://www.wikidata.org/entity/' + title + '">Here\'s the item</a>'
     )}
   , ftid: function (title) {return(
       '<strong>'+title + '</strong> is a fact identifier issued by the <a href="http://contentmine.org">ContentMine</a>.'
@@ -89,23 +94,36 @@ function checkHash() {
   table.draw()
 }
 
+function getColorNumber (cmid) {
+  var dictionary = cmid.split('.')[1].split(/[0-9]/)[0]
+  if (!(dictionary in colormap)) {
+    var newColorValue=Math.max(1, ... _.values(colormap))+1
+    if (Number.isInteger(newColorValue)) {
+      colormap[dictionary] = newColorValue
+    }
+  }
+  return colors[colormap[dictionary]]
+}
+
 function loadFile() {
-  var input = document.getElementById('fileinput');
-  var file = input.files[0];
-  var fr = new FileReader();
-  fr.onload = receivedText;
-  fr.readAsText(file);
+  if (load) {
+    var input = document.getElementById('fileinput');
+    var file = input.files[0];
+    var fr = new FileReader();
+    fr.onload = receivedText;
+    fr.readAsText(file);
+  } load = false
 }
 
 function loadDefault() {
-  $.get('sample.json', function(file) {
+  if (load) $.get('sample.json', function(file) {
     receivedText(file)
   }).fail((err) => {
     var e = {}
     e.target = {}
     e.target.result = err.responseText
     receivedText(e)
-  })
+  }); load = false
 }
 
 function receivedText(e) {
@@ -114,9 +132,9 @@ function receivedText(e) {
   for(var line = 0; line < lines.length; line++){
     try{
       var obj = JSON.parse(lines[line])
-      obj._source.prefix = _.escape(obj._source.prefix)
-      obj._source.post   = _.escape(obj._source.post  )
-      obj._source.term   = _.escape(obj._source.term  )
+      obj._source.prefix = _.escape( removeXML( obj._source.prefix ) )
+      obj._source.post   = _.escape( removeXML( obj._source.post   ) )
+      obj._source.term   = _.escape(            obj._source.term     )
       newArr.push(obj)
     } catch(e) {
 
@@ -143,31 +161,17 @@ function receivedText(e) {
   }
   
   function wikidataID (wid) {
-    if (wid) {
-      formattedString = `<a href="https://www.wikidata.org/entity/${wid}">${wid}</a>`//
-      return formattedString
-    }
-    else return ''
+    if (wid)
+      return ( '<a href="#wdid='+wid+'">'+wid+'</a>' )
+    else
+      return ''
   }
   
   function removeXML (str) {
-    return str.replace(/&lt;/g,'<').replace(/&gt;/g,'>').replace(/&?(#x)?.+?;/g,'').replace(
+    return str/*.replace(/&lt;/g,'<').replace(/&gt;/g,'>').replace(/&?(#x)?.+?;/g,'')*/.replace(
       /^[^<]*>|<.+?>|<[^>]*$/g,
       ' '
     )
-  }
-
-  var colormap = {}
-
-  function getColorNumber (cmid) {
-    var dictionary = cmid.split('.')[1].split(/[0-9]/)[0]
-    if (!(dictionary in colormap)) {
-      var newColorValue=Math.max(1, ... _.values(colormap))+1
-      if (Number.isInteger(newColorValue)) {
-	colormap[dictionary] = newColorValue
-      }
-    }
-    return colors[colormap[dictionary]]
   }
 
   function prependEnWiki (name) {
@@ -198,7 +202,7 @@ function receivedText(e) {
   function createdRowFunc (row, data, dataIndex) {
     var color = getColorNumber(data[0])
     $(row).find('td.cmid .icon').css('background-color', color)
-    /*var wid = $(data[5]).text()
+    var wid = $(data[5]).text()
     if (wid) {
       getWikiBaseItem(wid, function (response) {
 	  var title = response.entities[wid].sitelinks.enwiki.title
@@ -211,7 +215,7 @@ function receivedText(e) {
 	    if (target) $(row).find('td.term img').attr('title',`Population of: ${target}`)
 	  })
 	})
-    }*/
+    }
   }
 
   $('#front-loading-matter').css('display', 'none')
@@ -221,9 +225,9 @@ function receivedText(e) {
     '<tr>' +
       '<td class="cmid">'+ contentmineID(value._source.identifiers.contentmine) +'</td>' +
       '<td class="pmid"><span><a href="#pmid='+value._source.cprojectID+'">'+ value._source.cprojectID+'</td>' +
-      '<td class="pre" ><span>' + removeXML(value._source.prefix)+'</td>' +
+      '<td class="pre" ><span>' + value._source.prefix.replace(/(\&|\&amp;)\#x.*?\;/g,'')+'</td>' +
       '<td class="term"><span>'+ value._source.term+'</td>' +
-      '<td class="post"><span>'+ removeXML(value._source.post)+'</td>' +
+      '<td class="post"><span>'+ value._source.post.replace(/(\&|\&amp;)\#x.*?\;/g,'')+'</td>' +
       '<td class="wdid"><span>'+ wikidataID(value._source.identifiers.wikidata)+'</td>' +
       '<td class="ftid"><span>'+ factID(value._id) +'</td>' +
     '</tr>';

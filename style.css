@@ -123,14 +123,25 @@ body > footer {
   margin:0 auto;
 }
 
-.icon {
-  width:25px;
-  height:25px;
+.icon,.icon-small {
   -webkit-border-radius:50%;
   -moz-border-radius:50%;
   -ms-border-radius:50%;
   border-radius:50%;
+}
+
+.icon {
+  width:25px;
+  height:25px;
   margin:7px 12px 7px 7px;
+}
+
+.icon-small {
+  display:inline-block;
+  height:1em;
+  width:1em;
+  margin:0px .3em;
+  vertical-align: middle;
 }
 
 #mytable_wrapper > :first-child {
