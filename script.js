@@ -1,7 +1,7 @@
 var table
   , hash  = getHash()
   , load  = true
-  
+
   , colormap = {}
   , column= [ 'cmid', 'pmid', 'pre', 'term', 'post', 'wdid', 'ftid' ]
   , desc  = {
@@ -30,7 +30,7 @@ window.onhashchange = checkHash
 function getHash () {
   var param = decodeURIComponent( window.location.hash.replace( /^#/, '' ) )
     , parts = param.split( '=' )
-  
+
   return {
     key: parts[ 0 ],
     val: parts[ 1 ]
@@ -44,53 +44,53 @@ function clearFilter() {
 
 function checkHash() {
   hash = getHash()
-  
+
   var index
     , value
     , columns = true
     , title   = hash.val||hash.key
     , text
-  
+
   if ( hash.val ) {
       index = column.indexOf( hash.key )
     , value = hash.val
-    
+
     if (title&&desc.hasOwnProperty(hash.key)) text = desc[ hash.key ]( title )
   } else if ( hash.key ) {
     if ( /^CM\.[a-z]+([A-Z][a-z]*)*\d*$/.test( hash.key ) ) {
       index = column.indexOf( 'cmid' )
     , value = hash.key
-    
+
       if ( title ) text = desc[ 'cmid' ]( title )
     } else if ( /^PMC\d+$/.test( hash.key ) ) {
       index = column.indexOf( 'pmid' )
     , value = hash.key
-    
+
       if ( title ) text = desc[ 'pmid' ]( title )
     } else if ( /^Q\d+$/.test( hash.key ) ) {
       index = column.indexOf( 'wdid' )
     , value = hash.key
-    
+
       if ( title ) text = desc[ 'wdid' ]( title )
     } else {
       columns = false
       table.columns( 2, 3, 4 ).search( hash.key )
     }
   }
-  
+
   table
     .search( '' )
     .columns().search( '' )
-  
+
   if ( columns )
     table.column( index ).search( value )
-  
+
   if ( title&&text ) {
     $('#desc-title').html(title)
     $('#desc-text').html(text)
     $('#desc,#backButton').show()
   }
-  
+
   table.draw()
 }
 
@@ -140,9 +140,9 @@ function receivedText(e) {
 
     }
   }
-  
+
   var html = ''
-  
+
   function contentmineID (cmid) {
     return (
       '<a href="#cmid='+cmid+'">'+
@@ -151,7 +151,7 @@ function receivedText(e) {
       '</a>'
     )
   }
-  
+
   function factID ( ftid ) {
     return (
       '<a href="#ftid=' + ftid + '">' +
@@ -159,14 +159,14 @@ function receivedText(e) {
       '</span></a>'
     )
   }
-  
+
   function wikidataID (wid) {
     if (wid)
       return ( '<a href="#wdid='+wid+'">'+wid+'</a>' )
     else
       return ''
   }
-  
+
   function removeXML (str) {
     return str/*.replace(/&lt;/g,'<').replace(/&gt;/g,'>').replace(/&?(#x)?.+?;/g,'')*/.replace(
       /^[^<]*>|<.+?>|<[^>]*$/g,
@@ -210,9 +210,20 @@ function receivedText(e) {
 	    var url = prependEnWiki(title)
 	    var html = ` <a href="${url}"><img src="W_icon.png" alt="wikipedia_icon"</a>`//
 	    $(row).find('td.term').append(html)
+
 	  }
+    try {
+      desc = response.entities[wid].descriptions.en.value
+    }
+    catch (err) {}
+    if (desc) {
+      $(row).find('td.term').attr('title', desc)
+    }
 	  returnTargetOfProperty(response, wid, 'P1082', function (target) {
-	    if (target) $(row).find('td.term img').attr('title',`Population of: ${target}`)
+      var population = target.replace('+', '')
+      var oldtitle = $(this).attr("title") ? ' ' + $(this).attr("title") : ''
+	    if (target) $(row).find('td.term').attr('title', `${oldtitle}Population of: ${population}`).attr('data-toggle', 'tooltip').attr('data-container', 'body')
+      $('[data-toggle="tooltip"]').tooltip();
 	  })
 	})
     }
@@ -225,16 +236,16 @@ function receivedText(e) {
     '<tr>' +
       '<td class="cmid">'+ contentmineID(value._source.identifiers.contentmine) +'</td>' +
       '<td class="pmid"><span><a href="#pmid='+value._source.cprojectID+'">'+ value._source.cprojectID+'</td>' +
-      '<td class="pre" ><span>' + value._source.prefix.replace(/(\&|\&amp;)\#x.*?\;/g,'')+'</td>' +
+      '<td class="pre" ><span>' + value._source.prefix.replace(/(\&|\&amp;)\#x.*?\;/g,'')+'</td>' + //This removes the url encoded text from the snippets
       '<td class="term"><span>'+ value._source.term+'</td>' +
       '<td class="post"><span>'+ value._source.post.replace(/(\&|\&amp;)\#x.*?\;/g,'')+'</td>' +
       '<td class="wdid"><span>'+ wikidataID(value._source.identifiers.wikidata)+'</td>' +
       '<td class="ftid"><span>'+ factID(value._id) +'</td>' +
     '</tr>';
   })
-  
+
   $('tbody').append(html)
-  
+
   if ( $.fn.dataTable.isDataTable( '#mytable' ) ) {
     table = $('#mytable').DataTable();
   } else {
@@ -258,16 +269,16 @@ function receivedText(e) {
 	"<'row r-page'<'col-sm-5 c-info'i><'col-sm-7 c-pagination'p>>"
     } );
   }
-  
+
   $('#mytable_filter input').on( 'input' , function () {
     window.location.hash = table.search()
   } )
-  
+
   $('#mytable').css('display', 'table')
-  
+
   $('#mytable_filter label').append(
     ' <button onclick="clearFilter()">Clear Filter</button>'
   )
-  
+
   clearFilter()
 }
