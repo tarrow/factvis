@@ -17,15 +17,16 @@
 	<span class="material-icons">arrow_back</span>
       </div>
     </header>
+    <link rel="stylesheet" href="https://code.jquery.com/ui/1.12.1/themes/smoothness/jquery-ui.css">
 
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.js"></script>
     <script src="bower_components/bootstrap-css/js/bootstrap.min.js"></script>
     <script src="bower_components/jput/js/jput.min.js"></script>
     <script src="bower_components/lodash/lodash.js"></script>
     <script src="bower_components/datatables/media/js/jquery.dataTables.min.js"></script>
     <script src="bower_components/datatables/media/js/dataTables.bootstrap.min.js"></script>
-<!--     <script src="bower_components/datatables/media/js/dataTables.responsive.min.js"></script> -->
     <script src="bower_components/wikidata-sdk/dist/wikidata-sdk.js"></script>
+    <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
     <script src="colors.js"></script>
     <script src="script.js"></script>
 
@@ -49,6 +50,12 @@
 	<form>
 	  <fieldset>
 	    <input type='button' id='btnDefault' value='Load Zika Facts!' onclick="loadDefault();" class="btn btn-primary">
+	  </fieldset>
+	</form>
+  <form>
+	  <fieldset>
+	    <input type='date' id='datepicker'>
+      <input type='button' id='btnDate' value='Load Facts by Date' onclick="loadDate();" class="btn btn-primary">
 	  </fieldset>
 	</form>
       </div>

@@ -110,14 +110,17 @@ function loadFile() {
     var input = document.getElementById('fileinput');
     var file = input.files[0];
     var fr = new FileReader();
-    fr.onload = receivedText;
+    function dummyRemoveXMLFromZDump (file) {
+      removeXMLFromZDump(file, receivedText)
+    }
+    fr.onload = dummyRemoveXMLFromZDump;
     fr.readAsText(file);
   } load = false
 }
 
 function loadDefault() {
   if (load) $.get('sample.json', function(file) {
-    receivedText(file)
+    removeXMLFromZDump(file, receivedText)
   }).fail((err) => {
     var e = {}
     e.target = {}
@@ -126,8 +129,21 @@ function loadDefault() {
   }); load = false
 }
 
-function receivedText(e) {
+function loadDate() {
+  var date = document.getElementById('datepicker').value
+  console.log(date)
+}
+
+function removeXML (str) {
+  return str/*.replace(/&lt;/g,'<').replace(/&gt;/g,'>').replace(/&?(#x)?.+?;/g,'')*/.replace(
+    /^[^<]*>|<.+?>|<[^>]*$/g,
+    ' '
+  )
+}
+
+function removeXMLFromZDump(e, cb) {
   lines = e.target.result.split('\n');
+  console.log(lines)
   var newArr = []
   for(var line = 0; line < lines.length; line++){
     try{
@@ -136,26 +152,37 @@ function receivedText(e) {
       obj._source.post   = _.escape( removeXML( obj._source.post   ) )
       obj._source.term   = _.escape(            obj._source.term     )
       newArr.push(obj)
-    } catch(e) {
-
+    } catch(err) {
+      console.log(err)
     }
   }
+if(cb) {
+  console.log(newArr)
+  cb(newArr)
+}
+else {
+ return newArr
+}
+}
+
+function receivedText(newArr) {
+
 
   var html = ''
 
   function contentmineID (cmid) {
     return (
       '<a href="#cmid='+cmid+'">'+
-	'<div class="icon"></div>' +
-	'<span>' + cmid + '</span>' +
-      '</a>'
+	     '<div class="icon"></div>' +
+	      '<span>' + cmid + '</span>' +
+        '</a>'
     )
   }
 
   function factID ( ftid ) {
     return (
       '<a href="#ftid=' + ftid + '">' +
-	'<i class="material-icons">link</i><span style="font-size:0;">' + ftid +
+	     '<i class="material-icons">link</i><span style="font-size:0;">' + ftid +
       '</span></a>'
     )
   }
@@ -165,13 +192,6 @@ function receivedText(e) {
       return ( '<a href="#wdid='+wid+'">'+wid+'</a>' )
     else
       return ''
-  }
-
-  function removeXML (str) {
-    return str/*.replace(/&lt;/g,'<').replace(/&gt;/g,'>').replace(/&?(#x)?.+?;/g,'')*/.replace(
-      /^[^<]*>|<.+?>|<[^>]*$/g,
-      ' '
-    )
   }
 
   function prependEnWiki (name) {
