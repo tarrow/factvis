@@ -133,7 +133,7 @@ function loadDefault() {
 
 function loadDate() {
   var date = document.getElementById('datepicker').value
-  $.ajax('http://'+apiHost+'/wikifactmine-api/api/date/'+date, {
+  $.ajax('https://'+apiHost+'/wikifactmine-api/api/date/'+date, {
     dataType: 'json',
     jsonp: false,
     success: function (data) {
