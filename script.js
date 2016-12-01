@@ -127,7 +127,7 @@ function loadDefault() {
     var e = {}
     e.target = {}
     e.target.result = err.responseText
-    receivedText(e)
+    removeXMLFromZDump(e, receivedText)
   }); load = false
 }
 
@@ -158,7 +158,7 @@ function removeXMLFromZDump(e, cb) {
       obj.prefix = _.escape( removeXML( obj._source.prefix ) )
       obj.post   = _.escape( removeXML( obj._source.post   ) )
       obj.term   = _.escape(            obj._source.term     )
-      obj.identifiers = _.clone(obj._source.identifiers, true)
+      obj.identifiers = _.cloneDeep(obj._source.identifiers)
       obj.cprojectID = obj._source.cprojectID
       obj.documentID = obj._source.documentID
       newArr.push(obj)
