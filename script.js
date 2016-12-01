@@ -158,7 +158,7 @@ function removeXMLFromZDump(e, cb) {
       obj.prefix = _.escape( removeXML( obj._source.prefix ) )
       obj.post   = _.escape( removeXML( obj._source.post   ) )
       obj.term   = _.escape(            obj._source.term     )
-      obj.identifiers = obj._source.identifiers
+      obj.identifiers = _.clone(obj._source.identifiers, true)
       obj.cprojectID = obj._source.cprojectID
       obj.documentID = obj._source.documentID
       newArr.push(obj)
