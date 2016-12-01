@@ -25,6 +25,8 @@ var table
     )}
   }
 
+var apiHost = 'tools.wmflabs.org'
+
 window.onhashchange = checkHash
 
 function getHash () {
@@ -131,7 +133,13 @@ function loadDefault() {
 
 function loadDate() {
   var date = document.getElementById('datepicker').value
-  console.log(date)
+  $.ajax('http://'+apiHost+'/wikifactmine-api/api/date/'+date, {
+    dataType: 'json',
+    jsonp: false,
+    success: function (data) {
+      receivedText(data)
+    }
+  })
 }
 
 function removeXML (str) {
@@ -143,26 +151,27 @@ function removeXML (str) {
 
 function removeXMLFromZDump(e, cb) {
   lines = e.target.result.split('\n');
-  console.log(lines)
   var newArr = []
   for(var line = 0; line < lines.length; line++){
     try{
       var obj = JSON.parse(lines[line])
-      obj._source.prefix = _.escape( removeXML( obj._source.prefix ) )
-      obj._source.post   = _.escape( removeXML( obj._source.post   ) )
-      obj._source.term   = _.escape(            obj._source.term     )
+      obj.prefix = _.escape( removeXML( obj._source.prefix ) )
+      obj.post   = _.escape( removeXML( obj._source.post   ) )
+      obj.term   = _.escape(            obj._source.term     )
+      obj.identifiers = obj._source.identifiers
+      obj.cprojectID = obj._source.cprojectID
+      obj.documentID = obj._source.documentID
       newArr.push(obj)
     } catch(err) {
-      console.log(err)
+
     }
   }
-if(cb) {
-  console.log(newArr)
-  cb(newArr)
-}
-else {
- return newArr
-}
+  if(cb) {
+    cb(newArr)
+  }
+  else {
+   return newArr
+  }
 }
 
 function receivedText(newArr) {
@@ -252,18 +261,21 @@ function receivedText(newArr) {
   $('#front-loading-matter').css('display', 'none')
 
   $.each(newArr, function(index, value) {
-    html +=
-    '<tr>' +
-      '<td class="cmid">'+ contentmineID(value._source.identifiers.contentmine) +'</td>' +
-      '<td class="pmid"><span><a href="#pmid='+value._source.cprojectID+'">'+ value._source.cprojectID+'</td>' +
-      '<td class="pre" ><span>' + value._source.prefix.replace(/(\&|\&amp;)\#x.*?\;/g,'')+'</td>' + //This removes the url encoded text from the snippets
-      '<td class="term"><span>'+ value._source.term+'</td>' +
-      '<td class="post"><span>'+ value._source.post.replace(/(\&|\&amp;)\#x.*?\;/g,'')+'</td>' +
-      '<td class="wdid"><span>'+ wikidataID(value._source.identifiers.wikidata)+'</td>' +
-      '<td class="ftid"><span>'+ factID(value._id) +'</td>' +
-    '</tr>';
+    if(value) {
+      value.prefix=_.escape(value.prefix)
+      value.post=_.escape(value.post)
+      html +=
+      '<tr>' +
+        '<td class="cmid">'+ contentmineID(value.identifiers.contentmine) +'</td>' +
+        '<td class="pmid"><a href="#pmid='+value.cprojectID[0]+'">'+ value.cprojectID[0]+'</td>' +
+        '<td class="pre" >' + value.prefix.replace(/(\&|\&amp;)\#x.*?\;/g,'')+'</td>' + //This removes the url encoded text from the snippets
+        '<td class="term">'+ value.term+'</td>' +
+        '<td class="post">'+ value.post.replace(/(\&|\&amp;)\#x.*?\;/g,'')+'</td>' +
+        '<td class="wdid">'+ wikidataID(value.identifiers.wikidata)+'</td>' +
+        '<td class="ftid">'+ factID(value._id) +'</td>' +
+      '</tr>';
+    }
   })
-
   $('tbody').append(html)
 
   if ( $.fn.dataTable.isDataTable( '#mytable' ) ) {
